@@ -128,19 +128,7 @@ Where the two tools differ, the reason is explained:
 └── spss/           # IBM SPSS output screenshots
 ```
 
-##  Reproducing
 
-Requires R ≥ 4.1:
-
-```r
-install.packages(c("dplyr", "knitr", "rmarkdown"))
-rmarkdown::render("analiz.Rmd")
-```
-
-The sign test and Mann-Kendall test are implemented in base R and give the same
-results as `BSDA::SIGN.test` and `Kendall::MannKendall`, so no extra packages are needed.
-
----
 
 ##  About
 
