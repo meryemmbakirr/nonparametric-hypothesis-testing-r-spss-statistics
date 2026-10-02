@@ -2,8 +2,6 @@
 
 ![R](https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white)
 ![SPSS](https://img.shields.io/badge/IBM%20SPSS-052FAD?logo=ibm&logoColor=white)
-![R Markdown](https://img.shields.io/badge/R%20Markdown-reproducible-blue)
-![Course](https://img.shields.io/badge/course-İST377-lightgrey)
 
 > **This repository contains my assignment for İST377, where I applied nonparametric tests to two datasets using R and SPSS.
 > ** This project answers two applied research questions with
