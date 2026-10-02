@@ -5,23 +5,23 @@
 ![R Markdown](https://img.shields.io/badge/R%20Markdown-reproducible-blue)
 ![Course](https://img.shields.io/badge/course-İST377-lightgrey)
 
-> **When the data are small, skewed or full of outliers, the usual t-test and
-> ANOVA can mislead.** This project answers two applied research questions with
+> **This repository contains my assignment for İST377, where I applied nonparametric tests to two datasets using R and SPSS.
+> ** This project answers two applied research questions with
 > rank-based (nonparametric) tests, justifies every method choice with
 > assumption checks, and cross-validates all results between **R** and **IBM SPSS**.
 
-📄 **Full analysis with code, output and every plot → [`analiz.md`](analiz.md)** (written in Turkish)
+ **Full analysis with code, output and every plot → [`analiz.md`](analiz.md)** (written in Turkish)
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 The project works with two small experimental datasets and asks:
 
 | | Research question | Data |
 |---|---|---|
-| 🧫 **Experiment 1** | Do food preservatives reduce bacterial growth, and **which ones** work? | Log bacteria counts: 1 control + 3 preservatives (n = 21) |
-| 🌱 **Experiment 2** | Does the **distance from a shelterbelt** (windbreak) change soil temperature? | Soil temperature at 20 / 40 / 100 / 200 m, measured monthly Jan–Nov (n = 44) |
+|  **Experiment 1** | Do food preservatives reduce bacterial growth, and **which ones** work? | Log bacteria counts: 1 control + 3 preservatives (n = 21) |
+|  **Experiment 2** | Does the **distance from a shelterbelt** (windbreak) change soil temperature? | Soil temperature at 20 / 40 / 100 / 200 m, measured monthly Jan–Nov (n = 44) |
 
 Beyond answering the questions, the aim is to show the full workflow of a
 statistical analysis: **check assumptions → choose the right test → interpret
@@ -29,7 +29,7 @@ the result → verify it in a second tool.**
 
 ---
 
-## 🔍 Why nonparametric tests?
+##  Why nonparametric tests?
 
 Parametric tests (t-test, ANOVA) assume normally distributed data. The
 assumption checks showed this does not hold for Experiment 1:
@@ -45,27 +45,12 @@ Experiment 2 passes the normality test, but with only 11 observations per group,
 an outlier at 20 m and repeated measurements on the same months, a rank-based
 test that accounts for the **block (month) structure** is the safer choice.
 
-### Test selection
-
-```mermaid
-flowchart LR
-    A[Research question] --> B{How many groups?}
-    B -->|1 group vs. a value| C[Sign test<br/>Wilcoxon signed-rank]
-    B -->|2 groups| D{Independent or paired?}
-    D -->|Independent| E[Mann-Whitney U]
-    D -->|Paired| F[Wilcoxon signed-rank]
-    B -->|k groups| G{Independent or blocked?}
-    G -->|Independent| H[Kruskal-Wallis<br/>+ Dunn post-hoc]
-    G -->|Blocked| I[Friedman]
-    A --> J{Trend over time?}
-    J --> K[Mann-Kendall]
-```
 
 ---
 
-## 📊 Results
+##  Results
 
-### 🧫 Experiment 1 – Preservatives work, but not equally
+###  Experiment 1 – Preservatives work, but not equally
 
 <p align="center">
   <img src="figures/s1-boxplot-1.png" width="560" alt="Boxplot of log bacteria counts by group">
@@ -86,7 +71,7 @@ Preservative 3 is the most effective. Preservative 2 looks better than the
 control on its own (Mann-Whitney, p = 0.016), but this difference does not
 survive correction for multiple comparisons.
 
-### 🌱 Experiment 2 – Distance has no effect; the season does
+###  Experiment 2 – Distance has no effect; the season does
 
 <p align="center">
   <img src="figures/s2-etkilesim-1.png" width="560" alt="Soil temperature by month and distance">
@@ -114,7 +99,7 @@ and fall with the season.
 
 ---
 
-## 🔁 R vs. SPSS
+##  R vs. SPSS
 
 Every test was run in both tools to verify the results. SPSS output is shown
 under each question in [`analiz.md`](analiz.md). For example, the Dunn post-hoc
@@ -133,19 +118,9 @@ Where the two tools differ, the reason is explained:
 
 ---
 
-## 🛠️ Skills demonstrated
 
-- Checking assumptions (Shapiro-Wilk, Q-Q plots, outlier detection) and choosing
-  tests accordingly
-- One-sample, two-sample, k-sample and trend tests for independent and paired/blocked designs
-- Multiple-comparison correction (Bonferroni) and post-hoc analysis
-- Implementing Dunn's and Mann-Kendall tests from scratch in base R
-- Reproducible reporting with R Markdown
-- Cross-checking results between R and IBM SPSS
 
----
-
-## 📁 Project structure
+##  Project structure
 
 ```
 ├── analiz.Rmd      # Source analysis (R Markdown)
@@ -155,7 +130,7 @@ Where the two tools differ, the reason is explained:
 └── spss/           # IBM SPSS output screenshots
 ```
 
-## ▶️ Reproducing
+##  Reproducing
 
 Requires R ≥ 4.1:
 
@@ -169,9 +144,9 @@ results as `BSDA::SIGN.test` and `Kendall::MannKendall`, so no extra packages ar
 
 ---
 
-## 👤 About
+##  About
 
-Course assignment for *İST377 Nonparametric Statistical Methods*, Spring 2026.
+Course assignment for *İST377 Nonparametric Statistical Methods*, autumn 2026.
 The code was cleaned up, documented and published in October 2026.
 
 **Author:** Meryem Bakır
