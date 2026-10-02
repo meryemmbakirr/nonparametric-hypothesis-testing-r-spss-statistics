@@ -1,67 +1,163 @@
-# Nonparametric Statistical Methods (İST377)
+# Nonparametric Statistical Methods: Preservatives & Soil Temperature
 
-Course project applying nonparametric hypothesis tests to two small experimental
-datasets, implemented in **R** and cross-checked in **IBM SPSS**.
+![R](https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white)
+![SPSS](https://img.shields.io/badge/IBM%20SPSS-052FAD?logo=ibm&logoColor=white)
+![R Markdown](https://img.shields.io/badge/R%20Markdown-reproducible-blue)
+![Course](https://img.shields.io/badge/course-İST377-lightgrey)
 
-📄 **[Full analysis with code, output and plots → `analiz.md`](analiz.md)** (in Turkish)
+> **When the data are small, skewed or full of outliers, the usual t-test and
+> ANOVA can mislead.** This project answers two applied research questions with
+> rank-based (nonparametric) tests, justifies every method choice with
+> assumption checks, and cross-validates all results between **R** and **IBM SPSS**.
 
-## Datasets
+📄 **Full analysis with code, output and every plot → [`analiz.md`](analiz.md)** (written in Turkish)
 
-| File | Description | Design |
+---
+
+## 🎯 Objective
+
+The project works with two small experimental datasets and asks:
+
+| | Research question | Data |
 |---|---|---|
-| [`data/bakteri_koruyucu.csv`](data/bakteri_koruyucu.csv) | Log bacteria counts for a control group and three preservatives | 4 independent groups, n = 21 |
-| [`data/toprak_sicakligi.csv`](data/toprak_sicakligi.csv) | Soil temperature at 20, 40, 100 and 200 m from a shelterbelt, measured monthly (Jan–Nov) | 4 treatments × 11 months (blocked), n = 44 |
+| 🧫 **Experiment 1** | Do food preservatives reduce bacterial growth, and **which ones** work? | Log bacteria counts: 1 control + 3 preservatives (n = 21) |
+| 🌱 **Experiment 2** | Does the **distance from a shelterbelt** (windbreak) change soil temperature? | Soil temperature at 20 / 40 / 100 / 200 m, measured monthly Jan–Nov (n = 44) |
 
-## Methods
+Beyond answering the questions, the aim is to show the full workflow of a
+statistical analysis: **check assumptions → choose the right test → interpret
+the result → verify it in a second tool.**
 
-| # | Question | Test(s) |
-|---|---|---|
-| 1–2 | Descriptive statistics and assumption checks | Shapiro-Wilk, Q-Q plots, boxplots, interaction plot |
-| 3 | Is the median of Preservative 2 equal to 3.5? | Sign test, Wilcoxon signed-rank |
-| 4 | Control vs. Preservative 2 | Mann-Whitney U |
-| 5 | 20 m vs. 200 m (paired) | Wilcoxon signed-rank (paired) |
-| 6 | Do the four bacteria groups differ? | Kruskal-Wallis + Dunn post-hoc (Bonferroni) |
-| 7 | Does distance affect soil temperature? | Friedman test (months as blocks) |
-| 8 | Is there a monotonic trend over months? | Mann-Kendall |
+---
 
-## Key findings
+## 🔍 Why nonparametric tests?
 
-- **Preservatives work, but not equally.** The groups differ significantly
-  (Kruskal-Wallis, p < 0.001). Dunn's test shows Preservatives 1 and 3 reduce
-  bacteria counts significantly compared to the control; Preservative 2 does not
-  differ from the control once multiple comparisons are adjusted for.
-- **Distance from the shelterbelt has no detectable effect on soil temperature**
-  (Friedman, p = 0.066). Temperature is driven by season, not distance.
-- **The 20 m vs. 200 m paired comparison is borderline** (p = 0.046 without and
-  0.051 with continuity correction); the mean difference is only 0.19 °C.
-- **No monotonic trend** at 20 m (Mann-Kendall, p = 0.94): the series rises and
-  falls seasonally rather than trending in one direction.
+Parametric tests (t-test, ANOVA) assume normally distributed data. The
+assumption checks showed this does not hold for Experiment 1:
 
-## R vs. SPSS
+<p align="center">
+  <img src="figures/s1-qq-1.png" width="560" alt="Q-Q plots of the four bacteria groups">
+</p>
 
-Every test was run in both tools; SPSS output is shown under each question in
-[`analiz.md`](analiz.md). Differences are explained where they occur:
+- Shapiro-Wilk rejects normality for **Preservative 1 (p < 0.001)** and **Preservative 3 (p = 0.025)**.
+- Groups are tiny (4–6 observations) and three of them contain an outlier.
 
-- **Wilcoxon tests:** R reports exact p-values for small samples without ties,
-  SPSS reports asymptotic ones; for the paired test SPSS omits the continuity
-  correction (p = 0.046 vs. R's default 0.051).
-- **Post-hoc after Kruskal-Wallis:** SPSS uses Dunn's test. The R analysis
-  implements Dunn's test directly and reproduces the SPSS values exactly.
-- **Mann-Kendall** is not available in SPSS menus, so it was done only in R.
+Experiment 2 passes the normality test, but with only 11 observations per group,
+an outlier at 20 m and repeated measurements on the same months, a rank-based
+test that accounts for the **block (month) structure** is the safer choice.
 
-## Project structure
+### Test selection
+
+```mermaid
+flowchart LR
+    A[Research question] --> B{How many groups?}
+    B -->|1 group vs. a value| C[Sign test<br/>Wilcoxon signed-rank]
+    B -->|2 groups| D{Independent or paired?}
+    D -->|Independent| E[Mann-Whitney U]
+    D -->|Paired| F[Wilcoxon signed-rank]
+    B -->|k groups| G{Independent or blocked?}
+    G -->|Independent| H[Kruskal-Wallis<br/>+ Dunn post-hoc]
+    G -->|Blocked| I[Friedman]
+    A --> J{Trend over time?}
+    J --> K[Mann-Kendall]
+```
+
+---
+
+## 📊 Results
+
+### 🧫 Experiment 1 – Preservatives work, but not equally
+
+<p align="center">
+  <img src="figures/s1-boxplot-1.png" width="560" alt="Boxplot of log bacteria counts by group">
+</p>
+
+The four groups differ significantly (**Kruskal-Wallis, p < 0.001**). Dunn's
+post-hoc test (Bonferroni-adjusted) shows where the differences are:
+
+| Comparison | Adjusted p | Result |
+|---|---:|---|
+| Control vs. Preservative 1 | 0.036 | ✅ significantly lower bacteria |
+| Control vs. Preservative 3 | 0.001 | ✅ significantly lower bacteria |
+| Control vs. Preservative 2 | 1.000 | ❌ no significant difference |
+| Preservative 2 vs. Preservative 3 | 0.031 | ✅ Preservative 3 is more effective |
+
+**Takeaway:** Preservatives 1 and 3 clearly suppress bacterial growth;
+Preservative 3 is the most effective. Preservative 2 looks better than the
+control on its own (Mann-Whitney, p = 0.016), but this difference does not
+survive correction for multiple comparisons.
+
+### 🌱 Experiment 2 – Distance has no effect; the season does
+
+<p align="center">
+  <img src="figures/s2-etkilesim-1.png" width="560" alt="Soil temperature by month and distance">
+</p>
+
+The four distance lines lie almost on top of each other while all of them rise
+and fall with the season.
+
+- **Friedman test (months as blocks): p = 0.066** → no significant effect of distance.
+- **20 m vs. 200 m (paired Wilcoxon): p = 0.046–0.051**, borderline depending on
+  the method; the mean difference is only **0.19 °C**, which is practically negligible.
+- **Mann-Kendall trend test at 20 m: p = 0.94** → no monotonic trend; the pattern
+  is seasonal (up until April, then down), not a steady increase or decrease.
+
+### Summary
+
+| # | Question | Test | Result (α = 0.05) |
+|---|---|---|---|
+| 3 | Is the median of Preservative 2 equal to 3.5? | Sign test, Wilcoxon | Not different (p = 0.375, 0.313) |
+| 4 | Control vs. Preservative 2 | Mann-Whitney U | Different (p = 0.016) |
+| 5 | 20 m vs. 200 m | Paired Wilcoxon | Borderline (p = 0.046–0.051) |
+| 6 | All four bacteria groups | Kruskal-Wallis + Dunn | Different (p < 0.001) |
+| 7 | All four distances | Friedman | Not different (p = 0.066) |
+| 8 | Trend over months (20 m) | Mann-Kendall | No trend (p = 0.94) |
+
+---
+
+## 🔁 R vs. SPSS
+
+Every test was run in both tools to verify the results. SPSS output is shown
+under each question in [`analiz.md`](analiz.md). For example, the Dunn post-hoc
+test implemented in R reproduces the SPSS output exactly:
+
+<p align="center">
+  <img src="spss/s6_dunn_posthoc.png" width="560" alt="SPSS Dunn post-hoc output">
+</p>
+
+Where the two tools differ, the reason is explained:
+
+- **Wilcoxon tests:** R gives exact p-values for small samples, SPSS gives
+  asymptotic ones. For the paired test SPSS omits the continuity correction,
+  which moves the p-value from 0.051 (R) to 0.046 (SPSS), right across the 0.05 line.
+- **Mann-Kendall** is not available in SPSS menus, so it was run only in R.
+
+---
+
+## 🛠️ Skills demonstrated
+
+- Checking assumptions (Shapiro-Wilk, Q-Q plots, outlier detection) and choosing
+  tests accordingly
+- One-sample, two-sample, k-sample and trend tests for independent and paired/blocked designs
+- Multiple-comparison correction (Bonferroni) and post-hoc analysis
+- Implementing Dunn's and Mann-Kendall tests from scratch in base R
+- Reproducible reporting with R Markdown
+- Cross-checking results between R and IBM SPSS
+
+---
+
+## 📁 Project structure
 
 ```
 ├── analiz.Rmd      # Source analysis (R Markdown)
-├── analiz.md       # Rendered output, viewable on GitHub
+├── analiz.md       # Rendered report, viewable on GitHub
 ├── data/           # Input datasets (CSV)
 ├── figures/        # Plots generated by analiz.Rmd
 └── spss/           # IBM SPSS output screenshots
 ```
 
-## Reproducing
+## ▶️ Reproducing
 
-Requires R ≥ 4.1 with `dplyr`, `knitr` and `rmarkdown`.
+Requires R ≥ 4.1:
 
 ```r
 install.packages(c("dplyr", "knitr", "rmarkdown"))
@@ -69,13 +165,11 @@ rmarkdown::render("analiz.Rmd")
 ```
 
 The sign test and Mann-Kendall test are implemented in base R and give the same
-results as `BSDA::SIGN.test` and `Kendall::MannKendall`.
+results as `BSDA::SIGN.test` and `Kendall::MannKendall`, so no extra packages are needed.
 
-## Tools
+---
 
-R (dplyr, knitr, R Markdown) · IBM SPSS Statistics
-
-## About
+## 👤 About
 
 Course assignment for *İST377 Nonparametric Statistical Methods*, Spring 2026.
 The code was cleaned up, documented and published in October 2026.
